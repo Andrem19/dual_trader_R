@@ -23,8 +23,8 @@ async def place_order(settings: Settings, buy_sell: int):
                 
                 if float(resp['size']) > 0:
                     old_balance = BybitAPI.get_balance('USDT')
-                    current_position = Position(settings.coin, open_time , float(resp['avgPrice']), old_balance, settings.amount_coins)
-                    
+                    current_position = Position(settings.coin, open_time , float(resp['avgPrice']), old_balance, settings.amount_coins, buy_sell)
+
                     current_position.to_json()
                     await tel.send_inform_message(f'Position was taken successfully: {str(current_position)}', '', False)
                     return True, current_position
@@ -48,30 +48,6 @@ async def place_order(settings: Settings, buy_sell: int):
         else:
             print('some problem to place order')
     
-    elif settings.exchange == 'BN':
-        pass
-
-async def change_SL_after_first_cand(settings: Settings, buy_sell, current_position: Position):
-    bs = 'Buy' if buy_sell == 1 else 'Sell'
-    if settings.exchange == 'BB':
-        BybitAPI.cancel_orders()
-        time.sleep(1)
-        resp = None
-        if not settings.trailing_stop:
-            resp = BybitAPI.tp_sl(settings.coin, bs, settings.amount_coins, float(current_position.price_open), TP_perc=settings.target_perc, SL_perc=settings.close_perc)
-        else:
-            current_price = BybitAPI.get_last_price(settings.coin)
-            if current_price < (1 + settings.trailing_stop_triger) * current_position.price_open:
-                resp = BybitAPI.trailing_stop(True, settings.coin, 'Buy', settings.amount_coins, current_position.price_open, settings.trailing_stop_dist, settings.trailing_stop_triger, TP_perc=settings.target_perc*2, SL_perc=settings.close_perc)
-            else:
-                await tel.send_inform_message('Trailing Stop already trigered', '', False)
-                return True
-        if resp is not None and resp == 'OK':
-            await tel.send_inform_message('Sl successfuly changed', '', False)
-            return True
-        else:
-            await tel.send_inform_message('Cant change tp/sl something wrong', '', False)
-            return False
     elif settings.exchange == 'BN':
         pass
 

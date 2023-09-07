@@ -8,7 +8,7 @@ def add_saldo(item, path):
 def load_saldo():
     data = []
 
-    with open('positions/saldo_DOTUSDT.txt', 'r') as file:
+    with open('db/saldo_DOTUSDT.txt', 'r') as file:
         lines = file.readlines()
         for line in lines:
             parts = line.strip().split(',')

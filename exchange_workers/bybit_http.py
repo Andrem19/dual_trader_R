@@ -167,6 +167,38 @@ class BybitAPI:
             return None
         
     @staticmethod
+    def sl(coin: str, amount_coins: int, stop_loss_price: float):
+        endpoint = '/v5/position/trading-stop'
+        method = 'POST'
+
+        params = {
+            "category":"linear",
+            "symbol": coin,
+            "slTriggerBy": "IndexPrice",
+            "tpslMode": "Partial",
+            "slOrderType": "Limit",
+            "tpSize": str(amount_coins),
+            "slSize": str(amount_coins),
+            "positionIdx": 0
+        }
+
+
+        params["stopLoss"] = str(round(stop_loss_price, 3))
+        params["slLimitPrice"] = str(round(stop_loss_price, 3))
+        tp = stop_loss_price * (1 + 0.02)
+        # params["takeProfit"] = str(round(tp, 3))
+        # params["tpLimitPrice"] = str(round(tp, 3))
+        
+        params_str = json.dumps(params)
+        response = BybitAPI.HTTP_Request(endpoint, method, params_str, "Change_TP_SL")
+        date = json.loads(response)
+        print(date)
+        if 'retMsg' in date and date['retMsg'] == 'OK':
+            return 'OK'
+        else:
+            return None
+        
+    @staticmethod
     def trailing_stop(trail_stop: bool, coin: str, buy_sell: str, amount_coins: int, open_price: float, TS_dist: float, TS_trig: float, TP_perc = None, SL_perc = None):
         endpoint = '/v5/position/trading-stop'
         method = 'POST'

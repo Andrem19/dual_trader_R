@@ -13,14 +13,18 @@ app = None
 runner = None
 
 def open_worker():
-    global app, runner
+    global app, runner, settings
+    settings = None
+    with m.global_var_lock:
+        settings = m.settings_gl
     telegram_bot_api_key = config('SIGNAL_BOT')
     async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        global settings
         signals = update.message.text
         try:
             sign_dic = json.loads(signals)
         except json.JSONDecodeError:
-            await bc.request(signals, m.settings_gl)
+            await bc.request(signals, settings)
         else:
             timestamp = sign_dic['timestamp']
             if m.handler_lock:
@@ -30,16 +34,17 @@ def open_worker():
             
             if timestamp+25 > datetime.datetime.now().timestamp() or timestamp == 111 :
                 with m.global_var_lock:
-                    print(f'{signals} - price: {m.price.price}')
+                    print(f'{signals}')
                     signal = sign_dic['DOTUSDT']
 
                 if signal != 3:
-                    resp = BybitAPI.get_position_info(m.settings_gl.coin)
+                    resp = BybitAPI.get_position_info(settings.coin)
                     if float(resp['size']) == 0:
-                        settings = Settings(m.settings_gl.coin, m.settings_gl.t)
+                        settings = Settings(settings.coin, settings.t)
                         settings.from_json()
-                        m.settings_gl = settings
-                        await work.open_position(m.settings_gl, signal)
+                        with m.global_var_lock:
+                            m.settings_gl = settings
+                        await work.open_position(settings, signal)
             else:
                 pass
 

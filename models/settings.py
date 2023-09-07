@@ -9,11 +9,11 @@ class Settings:
         self.target_len: int = 5
         self.base_amount_coins: float = 5
         self.amount_coins: float = 5
-        self.skip_min: int = 8
+        self.skip_min: int = 1
         self.target_perc: float = 0.008
         self.trailing_stop: bool = True
-        self.trailing_stop_triger: float = 0.001
-        self.trailing_stop_dist: float = 0.001
+        self.trailing_stop_triger: float = 0.008
+        self.trailing_stop_dist: float = 0.007
         self.close_perc: float = 0.008
         self.super_close: float = 0.012
         self.order_in_perc: float = 0.0001

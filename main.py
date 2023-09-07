@@ -58,7 +58,7 @@ import os
 
 COIN = 'DOTUSDT'
 T = 5
-price = CPrice()
+pos_exist = False
 current_position = Position.create_empty()
 settings_gl = Settings(COIN, T)
 settings_gl.from_json()
@@ -66,10 +66,10 @@ handler_lock = False
 global_var_lock = threading.Lock()
 stop_flag = False
 
-def run_close_handler():
+async def run_close_handler():
     while not stop_flag:  # Add the stop flag check
         try:
-            ph.run_close_handler(settings_gl)
+            await ph.run_close_handler(settings_gl)
         except Exception as e:
             if stop_flag:
                 return
@@ -98,10 +98,10 @@ async def stop_program(signal, frame):
     os.kill(os.getpid(), signal)
 
 def main():
-    global handler_lock, settings_gl, price, current_position, stop_flag, close_thread  # Add stop_flag to global scope
+    global handler_lock, settings_gl, pos_exist, current_position, stop_flag, close_thread  # Add stop_flag to global scope
     stop_flag = False  # Initialize the stop flag
 
-    close_thread = threading.Thread(target=run_close_handler)
+    close_thread = threading.Thread(target=asyncio.run, args=(run_close_handler(),))
     close_thread.start()
 
     run_open_handler()
