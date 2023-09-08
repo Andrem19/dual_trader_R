@@ -299,8 +299,8 @@ class BybitAPI:
         return reversed_list
 
 
-BybitAPI.api_key = config("BBAPI")
-BybitAPI.secret_key = config("BBSECRET")
+BybitAPI.api_key = config("BBAPI_2")
+BybitAPI.secret_key = config("BBSECRET_2")
 BybitAPI.httpClient = requests.Session()
 BybitAPI.recv_window = str(5000)
 BybitAPI.url = "https://api.bybit.com"

@@ -44,7 +44,7 @@ def handle_price(message):
 
 async def run_close_handler(settings: Settings):
     print('close handler')        
-    global ws, position_exist, duration_sec, change_sl_skip_min, cur_pos, set, first_trailing_triger, sl_price
+    global ws, position_exist, duration_sec, change_sl_skip_min, cur_pos, set, first_trailing_triger, sl_price, last_price
     with m.global_var_lock:
         set = m.settings_gl
     ws = WebSocket(
@@ -69,15 +69,18 @@ async def run_close_handler(settings: Settings):
                 sl_price = 0
         # print(f'dur_sec: {duration_sec} - skip_min: {set.skip_min} chen_skip_min: {change_sl_skip_min}')
         if duration_sec >= set.skip_min * 60 and not change_sl_skip_min and not first_trailing_triger:
-            print('stop_lose move')
-            change_sl_skip_min = True
-            buy_sel = 'Buy' if cur_pos.signal == 1 else 'Sell'
-            sl_price = cur_pos.price_open * (1-set.close_perc)
-            BybitAPI.cancel_orders()
-            slres = BybitAPI.sl(set.coin, cur_pos.amount, sl_price)
-            print(slres)
-            if slres == 'OK':
+            if last_price < cur_pos.price_open * (1-set.close_perc):
+                await ex.close_order_timefinish(settings, cur_pos.signal)
+            else:
+                print('stop_lose move')
                 change_sl_skip_min = True
+                buy_sel = 'Buy' if cur_pos.signal == 1 else 'Sell'
+                sl_price = cur_pos.price_open * (1-set.close_perc)
+                BybitAPI.cancel_orders()
+                slres = BybitAPI.sl(set.coin, cur_pos.amount, sl_price)
+                print(slres)
+                if slres == 'OK':
+                    change_sl_skip_min = True
         if duration_sec >= set.target_len * set.t * 60 and not first_trailing_triger:
             await ex.close_order_timefinish(settings, cur_pos.signal)
 

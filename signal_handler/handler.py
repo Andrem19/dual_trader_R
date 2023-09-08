@@ -8,51 +8,57 @@ from decouple import config
 from telegram import Update, Bot
 import signal_handler.work as work
 import main as m
+import helpers.telegram as tel
+import asyncio
 
 app = None
 runner = None
 
 def open_worker():
-    global app, runner, settings
-    settings = None
-    with m.global_var_lock:
-        settings = m.settings_gl
-    telegram_bot_api_key = config('SIGNAL_BOT')
-    async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        global settings
-        signals = update.message.text
-        try:
-            sign_dic = json.loads(signals)
-        except json.JSONDecodeError:
-            await bc.request(signals, settings)
-        else:
-            timestamp = sign_dic['timestamp']
-            if m.handler_lock:
-                return
-
-            m.handler_lock = True
-            
-            if timestamp+25 > datetime.datetime.now().timestamp() or timestamp == 111 :
-                with m.global_var_lock:
-                    print(f'{signals}')
-                    signal = sign_dic['DOTUSDT']
-
-                if signal != 3:
-                    resp = BybitAPI.get_position_info(settings.coin)
-                    if float(resp['size']) == 0:
-                        settings = Settings(settings.coin, settings.t)
-                        settings.from_json()
-                        with m.global_var_lock:
-                            m.settings_gl = settings
-                        await work.open_position(settings, signal)
+    try:
+        global app, runner, settings
+        settings = None
+        with m.global_var_lock:
+            settings = m.settings_gl
+        telegram_bot_api_key = config('API_TOKEN_2')
+        async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+            global settings
+            signals = update.message.text
+            try:
+                sign_dic = json.loads(signals)
+            except json.JSONDecodeError:
+                await bc.request(signals, settings)
             else:
-                pass
+                timestamp = sign_dic['timestamp']
+                if m.handler_lock:
+                    return
 
-            m.handler_lock = False
+                m.handler_lock = True
+                
+                if timestamp+25 > datetime.datetime.now().timestamp() or timestamp == 111 :
+                    with m.global_var_lock:
+                        print(f'{signals}')
+                        signal = sign_dic['FILUSDT']
 
-    app = ApplicationBuilder().token(telegram_bot_api_key).build()
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handler))
-    app.add_handler(CommandHandler('ping', bc.ping))
-    runner = app.run_polling()
+                    if signal != 3:
+                        resp = BybitAPI.get_position_info(settings.coin)
+                        if float(resp['size']) == 0:
+                            settings = Settings(settings.coin, settings.t)
+                            settings.from_json()
+                            with m.global_var_lock:
+                                m.settings_gl = settings
+                            await work.open_position(settings, signal)
+                else:
+                    pass
 
+                m.handler_lock = False
+
+        app = ApplicationBuilder().token(telegram_bot_api_key).build()
+        app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handler))
+        app.add_handler(CommandHandler('ping', bc.ping))
+        runner = app.run_polling()
+    except Exception as e:
+        print(f'Error: {str(e)}')
+        asyncio.run(tel.send_inform_message(f'Error: {str(e)}', None, False))
+        pass
 

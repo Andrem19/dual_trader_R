@@ -56,7 +56,7 @@ import signal
 import asyncio
 import os
 
-COIN = 'DOTUSDT'
+COIN = 'FILUSDT'
 T = 5
 pos_exist = False
 current_position = Position.create_empty()

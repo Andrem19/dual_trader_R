@@ -3,7 +3,7 @@ from telegram import Bot
 
 async def send_inform_message(message, image_path: str, send_pic: bool):
     try:
-        api_token = config("API_TOKEN")
+        api_token = config("API_TOKEN_2")
         chat_id = config("CHAT_ID")
 
         bot = Bot(token=api_token)

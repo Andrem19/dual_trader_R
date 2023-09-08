@@ -12,10 +12,10 @@ class Settings:
         self.skip_min: int = 1
         self.target_perc: float = 0.008
         self.trailing_stop: bool = True
-        self.trailing_stop_triger: float = 0.008
-        self.trailing_stop_dist: float = 0.007
-        self.close_perc: float = 0.008
-        self.super_close: float = 0.012
+        self.trailing_stop_triger: float = 0.003
+        self.trailing_stop_dist: float = 0.001
+        self.close_perc: float = 0.004
+        self.super_close: float = 0.006
         self.order_in_perc: float = 0.0001
         self.doubling: bool = False
         self.doubling_counter: int = 3
@@ -33,7 +33,7 @@ class Settings:
             for key, value in data.items():
                 setattr(self, key, value)
 
-set = Settings('DOTUSDT', 5)
+set = Settings('FILUSDT', 5)
 set.to_json()
 # set.from_json()
 # print(set.__dict__)
