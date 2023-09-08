@@ -8,6 +8,7 @@ def read_deser_positions(coin: str) -> list[Position]:
     file_path = f'positions/position_{coin}.json'
 
     # Check if file exists
+    print('read deser pos')
     if os.path.isfile(file_path):
         with open(file_path, 'r') as file:
             for line in file:

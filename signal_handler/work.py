@@ -65,7 +65,7 @@ async def handle_positions(coin):
         positions[-1].time_close = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         prof = positions[-1].new_balance - positions[-1].old_balance
         positions[-1].profit = round(prof, 4)
-        positions[-1].duration = ser.convert_seconds_to_period(m.current_position.duration)
+        positions[-1].duration = ser.convert_seconds_to_period(float(m.current_position.duration))
         new_saldo = saldos[-1][1] + prof
         sal.add_saldo([datetime.datetime.now().timestamp()*1000, new_saldo], f'db/saldo_{coin}.txt')
         ser.add_pos_to_db(positions[-1], f'db/positions_{coin}.txt')

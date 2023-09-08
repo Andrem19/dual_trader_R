@@ -8,12 +8,14 @@ def add_saldo(item, path):
 def load_saldo():
     data = []
 
-    with open('db/saldo_DOTUSDT.txt', 'r') as file:
+    with open('db/saldo_GALAUSDT.txt', 'r') as file:
         lines = file.readlines()
+        print('count saldo')
         for line in lines:
-            parts = line.strip().split(',')
-            timestamp = float(parts[0])
-            value = float(parts[1])
-            data.append([timestamp, value])
+            if line != '':
+                parts = line.strip().split(',')
+                timestamp = float(parts[0])
+                value = float(parts[1])
+                data.append([timestamp, value])
 
     return data

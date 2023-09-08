@@ -9,11 +9,11 @@ from models.settings import Settings
 from models.position import Position
 import main as m
 
-telegram_bot_api_key = config('SIGNAL_BOT')
+telegram_bot_api_key = config('API_TOKEN_1')
 
 async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        coin = m.settngs_gl.coin
-        exchange = m.settngs_gl.exchange
+        coin = m.settings_gl.coin
+        exchange = m.settings_gl.exchange
         bot = Bot(token=telegram_bot_api_key)
         chat_id = update.message.chat_id
         await bot.send_message(chat_id=chat_id, text=f'{coin}-{exchange} - Alive!')

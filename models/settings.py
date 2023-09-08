@@ -9,11 +9,11 @@ class Settings:
         self.target_len: int = 5
         self.base_amount_coins: float = 5
         self.amount_coins: float = 5
-        self.skip_min: int = 1
+        self.skip_min: int = 8
         self.target_perc: float = 0.008
         self.trailing_stop: bool = True
         self.trailing_stop_triger: float = 0.003
-        self.trailing_stop_dist: float = 0.001
+        self.trailing_stop_dist: float = 0.0005
         self.close_perc: float = 0.004
         self.super_close: float = 0.006
         self.order_in_perc: float = 0.0001
@@ -33,7 +33,7 @@ class Settings:
             for key, value in data.items():
                 setattr(self, key, value)
 
-set = Settings('FILUSDT', 5)
-set.to_json()
+# set = Settings('GALAUSDT', 5)
+# set.to_json()
 # set.from_json()
 # print(set.__dict__)

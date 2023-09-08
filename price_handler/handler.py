@@ -18,10 +18,11 @@ set = None
 sl_price = 0
 change_sl_skip_min = False
 first_trailing_triger = False
+close_position_SL=False
 
 def handle_price(message):
     global position_exist, last_price, duration_sec, set, first_trailing_triger, sl_price
-    last_price = message['data']['lastPrice']
+    last_price = float(message['data']['lastPrice'])
     print(f'last_pr: {last_price}')
     with m.global_var_lock:
         position_exist = m.pos_exist
@@ -32,8 +33,12 @@ def handle_price(message):
     print(f'last price: {last_price}')
     if position_exist:
         print('before handle_trailing_stop')
-        if cur_pos.signal == 1:
-            handle_trailing_stop(cur_pos, last_price, set, sl_price)
+        if last_price > cur_pos.price_open * (1+set.trailing_stop_triger) and not first_trailing_triger:
+            handle_t_s(cur_pos, last_price, set, set.trailing_stop_dist)
+        elif (duration_sec >= set.skip_min * 60 and last_price < cur_pos.price_open * (1-set.close_perc) and not first_trailing_triger) or (duration_sec >= set.target_len * set.t * 60 and not first_trailing_triger):
+            handle_t_s(cur_pos, last_price, set, set.order_in_perc*2)
+        if first_trailing_triger:
+            handle_trailing_stop(cur_pos, last_price, set)
     else:
         first_trailing_triger = False
         change_sl_skip_min = False
@@ -44,7 +49,7 @@ def handle_price(message):
 
 async def run_close_handler(settings: Settings):
     print('close handler')        
-    global ws, position_exist, duration_sec, change_sl_skip_min, cur_pos, set, first_trailing_triger, sl_price, last_price
+    global ws, position_exist, duration_sec, change_sl_skip_min, cur_pos, set, first_trailing_triger, sl_price, last_price, close_position_SL
     with m.global_var_lock:
         set = m.settings_gl
     ws = WebSocket(
@@ -67,46 +72,49 @@ async def run_close_handler(settings: Settings):
                 first_trailing_triger = False
                 change_sl_skip_min = False
                 sl_price = 0
-        # print(f'dur_sec: {duration_sec} - skip_min: {set.skip_min} chen_skip_min: {change_sl_skip_min}')
-        if duration_sec >= set.skip_min * 60 and not change_sl_skip_min and not first_trailing_triger:
-            if last_price < cur_pos.price_open * (1-set.close_perc):
-                await ex.close_order_timefinish(settings, cur_pos.signal)
-            else:
-                print('stop_lose move')
+        if duration_sec >= set.skip_min * 60 and not change_sl_skip_min and not first_trailing_triger and position_exist:
+            print('stop_lose move')
+            change_sl_skip_min = True
+            sl_price = cur_pos.price_open * (1-set.close_perc)
+            sLimit_price = sl_price * (1 - 0.0005)
+            BybitAPI.cancel_orders()
+            slres = BybitAPI.sl(set.coin, cur_pos.amount, sl_price, sLimit_price)
+            print(slres)
+            if slres == 'OK':
                 change_sl_skip_min = True
-                buy_sel = 'Buy' if cur_pos.signal == 1 else 'Sell'
-                sl_price = cur_pos.price_open * (1-set.close_perc)
-                BybitAPI.cancel_orders()
-                slres = BybitAPI.sl(set.coin, cur_pos.amount, sl_price)
-                print(slres)
-                if slres == 'OK':
-                    change_sl_skip_min = True
-        if duration_sec >= set.target_len * set.t * 60 and not first_trailing_triger:
-            await ex.close_order_timefinish(settings, cur_pos.signal)
 
 
-def handle_trailing_stop(cur_pos: Position, last_price: float, set: Settings, sl_price: float):
-        global first_trailing_triger
+def handle_trailing_stop(cur_pos: Position, last_price: float, set: Settings):
+        global sl_price, duration_sec
         print(f'handle_trailing_stop: {cur_pos} - {last_price} - {sl_price}')
         if cur_pos.signal == 1:
-            if last_price > cur_pos.price_open * (1+set.trailing_stop_triger) and not first_trailing_triger:
-                BybitAPI.cancel_orders()
+            if last_price > sl_price * (1+set.trailing_stop_dist*2):
                 sl_price = last_price * (1-set.trailing_stop_dist)
-                res = BybitAPI.sl(set.coin, cur_pos.amount, sl_price)
-                if res == 'OK':
-                    first_trailing_triger = True
-            if first_trailing_triger and last_price > sl_price * (1+set.trailing_stop_dist*2):
-                sl_price = last_price * (1-set.trailing_stop_dist)
+                sLimit_price = sl_price * (1 - 0.0005)
                 BybitAPI.cancel_orders()
-                res = BybitAPI.sl(set.coin, cur_pos.amount, sl_price)
+                res = BybitAPI.sl(set.coin, cur_pos.amount, sl_price, sLimit_price)
         elif cur_pos.signal == 2:
-            if last_price < cur_pos.price_open * (1-set.trailing_stop_triger) and not first_trailing_triger:
-                BybitAPI.cancel_orders()
+            if last_price < sl_price * (1-set.trailing_stop_dist*2):
                 sl_price = last_price * (1+set.trailing_stop_dist)
-                res = BybitAPI.sl(set.coin, cur_pos.amount, sl_price)
-                if res:
-                    first_trailing_triger = True
-            if first_trailing_triger and last_price < sl_price * (1-set.trailing_stop_dist*2):
-                sl_price = last_price * (1+set.trailing_stop_dist)
+                sLimit_price = sl_price * (1 + 0.0005)
                 BybitAPI.cancel_orders()
-                res = BybitAPI.sl(set.coin, cur_pos.amount, sl_price)
+                res = BybitAPI.sl(set.coin, cur_pos.amount, sl_price, sLimit_price)
+
+def handle_t_s(cur_pos: Position, last_price: float, set: Settings, dist: float):
+    global first_trailing_triger, sl_price, duration_sec
+    if cur_pos.signal == 1:
+        BybitAPI.cancel_orders()
+        sl_price = last_price * (1-dist)
+        sLimit_price = sl_price * (1 - 0.0005)
+        res = BybitAPI.sl(set.coin, cur_pos.amount, sl_price, sLimit_price)
+        print(f'res: {res}')
+        print(f'first_trailing_triger: {first_trailing_triger}')
+        if res == 'OK':
+            first_trailing_triger = True
+    elif cur_pos.signal == 2:
+        BybitAPI.cancel_orders()
+        sl_price = last_price * (1+dist)
+        sLimit_price = sl_price * (1 + 0.0005)
+        res = BybitAPI.sl(set.coin, cur_pos.amount, sl_price, sLimit_price)
+        if res == 'OK':
+            first_trailing_triger = True

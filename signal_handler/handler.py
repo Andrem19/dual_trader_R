@@ -20,7 +20,7 @@ def open_worker():
         settings = None
         with m.global_var_lock:
             settings = m.settings_gl
-        telegram_bot_api_key = config('API_TOKEN_2')
+        telegram_bot_api_key = config('API_TOKEN_1')
         async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             global settings
             signals = update.message.text
@@ -38,7 +38,7 @@ def open_worker():
                 if timestamp+25 > datetime.datetime.now().timestamp() or timestamp == 111 :
                     with m.global_var_lock:
                         print(f'{signals}')
-                        signal = sign_dic['FILUSDT']
+                        signal = sign_dic['GALAUSDT']
 
                     if signal != 3:
                         resp = BybitAPI.get_position_info(settings.coin)

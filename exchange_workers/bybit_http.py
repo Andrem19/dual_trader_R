@@ -74,6 +74,35 @@ class BybitAPI:
         result = BybitAPI.HTTP_Request(endpoint, method, params_str, "Create")
         data = json.loads(result)
         return data
+
+    @staticmethod
+    def sl_order(symb: str, buy_sell: str, amount_coins: float, price):
+        endpoint = "/v5/order/create"
+        method = "POST"
+        orderLinkId = uuid.uuid4().hex
+
+
+        params = {
+            "category": "linear",
+            "symbol": symb,
+            "side": buy_sell,
+            "positionIdx": 0,
+            "orderType": "Limit",
+            "qty": str(round(amount_coins, 3)),
+            "price": str(round(price, 3)),
+            "isLeverage": 5,
+            "timeInForce": "GTC",
+            "orderLinkId": orderLinkId
+        }
+        params_str = json.dumps(params)
+
+        result = BybitAPI.HTTP_Request(endpoint, method, params_str, "Create")
+        data = json.loads(result)
+
+        if 'retMsg' in result and result['retMsg'] == 'OK':
+            return 'OK'
+        else:
+            return None
     
     @staticmethod
     def get_position_info(symbol: str):
@@ -167,7 +196,7 @@ class BybitAPI:
             return None
         
     @staticmethod
-    def sl(coin: str, amount_coins: int, stop_loss_price: float):
+    def sl(coin: str, amount_coins: int, stop_loss_price: float, stopLoss_Limit: float):
         endpoint = '/v5/position/trading-stop'
         method = 'POST'
 
@@ -184,8 +213,8 @@ class BybitAPI:
 
 
         params["stopLoss"] = str(round(stop_loss_price, 3))
-        params["slLimitPrice"] = str(round(stop_loss_price, 3))
-        tp = stop_loss_price * (1 + 0.02)
+        params["slLimitPrice"] = str(round(stopLoss_Limit, 3))
+        # tp = stop_loss_price * (1 + 0.02)
         # params["takeProfit"] = str(round(tp, 3))
         # params["tpLimitPrice"] = str(round(tp, 3))
         
