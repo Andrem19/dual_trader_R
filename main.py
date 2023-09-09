@@ -56,11 +56,10 @@ import signal
 import asyncio
 import os
 
-COIN = 'GALAUSDT'
 T = 5
 pos_exist = False
 current_position = Position.create_empty()
-settings_gl = Settings(COIN, T)
+settings_gl = Settings(T)
 settings_gl.from_json()
 handler_lock = False
 global_var_lock = threading.Lock()

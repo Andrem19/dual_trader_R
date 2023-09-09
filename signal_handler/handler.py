@@ -38,8 +38,10 @@ def open_worker():
                 if timestamp+25 > datetime.datetime.now().timestamp() or timestamp == 111 :
                     with m.global_var_lock:
                         print(f'{signals}')
-                        signal = sign_dic['GALAUSDT']
-
+                        coin_symbol = sign_dic['coin']
+                        signal = sign_dic[coin_symbol]
+                        m.settings_gl.coin = coin_symbol
+                        settings.coin = coin_symbol
                     if signal != 3:
                         resp = BybitAPI.get_position_info(settings.coin)
                         if float(resp['size']) == 0:

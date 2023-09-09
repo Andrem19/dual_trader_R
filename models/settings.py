@@ -1,9 +1,9 @@
 import json
 
 class Settings:
-    def __init__(self, coin, tm):
+    def __init__(self, tm):
         self.exchange: str = 'BB'
-        self.coin: str = coin
+        self.coin: str = None
         self.message_timer: int = 15
         self.t: int = tm
         self.target_len: int = 5
@@ -28,7 +28,7 @@ class Settings:
             json.dump(self.__dict__, file)
     
     def from_json(self):
-        with open(f"settings/settings_{self.coin}_{self.t}.json", "r") as file:
+        with open(f"settings/settings_UNIVERSAL_{self.t}.json", "r") as file:
             data = json.load(file)
             for key, value in data.items():
                 setattr(self, key, value)
