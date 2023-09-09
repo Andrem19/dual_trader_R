@@ -9,7 +9,7 @@ from models.settings import Settings
 from models.position import Position
 import shared_vars as sv
 
-telegram_bot_api_key = config('API_TOKEN_1')
+telegram_bot_api_key = config('API_TOKEN_2')
 
 async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         coin = sv.settings_gl.coin

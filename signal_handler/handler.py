@@ -20,7 +20,7 @@ def open_worker():
         settings = None
         with m.global_var_lock:
             settings = m.settings_gl
-        telegram_bot_api_key = config('API_TOKEN_1')
+        telegram_bot_api_key = config('API_TOKEN_2')
         async def handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             global settings
             signals = update.message.text
