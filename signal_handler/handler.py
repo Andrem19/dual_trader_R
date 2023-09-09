@@ -7,8 +7,8 @@ from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, Comma
 from decouple import config
 from telegram import Update, Bot
 import signal_handler.work as work
-import main as m
-import helpers.telegram as tel
+import helpers.telegr as tel
+import shared_vars as m
 import asyncio
 
 app = None
@@ -42,13 +42,11 @@ def open_worker():
                         signal = sign_dic[coin_symbol]
                         m.settings_gl.coin = coin_symbol
                         settings.coin = coin_symbol
+                        print(signal)
                     if signal != 3:
                         resp = BybitAPI.get_position_info(settings.coin)
+                        print(resp)
                         if float(resp['size']) == 0:
-                            settings = Settings(settings.coin, settings.t)
-                            settings.from_json()
-                            with m.global_var_lock:
-                                m.settings_gl = settings
                             await work.open_position(settings, signal)
                 else:
                     pass

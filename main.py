@@ -52,44 +52,44 @@ import threading
 import tracemalloc
 from models.settings import Settings
 from models.position import Position
+import shared_vars as sv
 import signal
 import asyncio
+
 import os
 
-T = 5
-pos_exist = False
-current_position = Position.create_empty()
-settings_gl = Settings(T)
-settings_gl.from_json()
-handler_lock = False
-global_var_lock = threading.Lock()
-stop_flag = False
-
 async def run_close_handler():
-    while not stop_flag:  # Add the stop flag check
-        try:
-            await ph.run_close_handler(settings_gl)
-        except Exception as e:
-            if stop_flag:
-                return
-            print(f"Error in run_close_handler: {e}")
-            time.sleep(5)  # Wait for 5 seconds before reconnecting
+    while not sv.stop_flag:
+        print(f'pos_exist: {sv.pos_exist}')
+        if sv.pos_exist:  # Add the stop flag check
+            try:
+                await ph.run_close_handler(sv.settings_gl)
+            except Exception as e:
+                if sv.stop_flag:
+                    return
+                print(f"Error in run_close_handler: {e}")
+                time.sleep(5)  # Wait for 5 seconds before reconnecting
+        else:
+            if ph.ws != None:
+                ph.ws.exit()
+            time.sleep(2)
+        time.sleep(1)
+
 
 def run_open_handler():
-    while not stop_flag:
+    while not sv.stop_flag:
         try:
             sh.open_worker()
         except Exception as e:
-            if stop_flag:
+            if sv.stop_flag:
                 return
             print(f"Error in run_open_handler: {e}")
             time.sleep(5)  # Wait for 5 seconds before reconnecting
 
 
 async def stop_program(signal, frame):
-    global stop_flag, close_thread
 
-    stop_flag = True
+    sv.stop_flag = True
     print("\nStopping the program...")
     ph.ws.exit()
     await sh.app.stop()
@@ -97,15 +97,14 @@ async def stop_program(signal, frame):
     os.kill(os.getpid(), signal)
 
 def main():
-    global handler_lock, settings_gl, pos_exist, current_position, stop_flag, close_thread  # Add stop_flag to global scope
-    stop_flag = False  # Initialize the stop flag
-
+    sv.stop_flag = False  # Initialize the stop flag
+    sv.pos_exist = False
     close_thread = threading.Thread(target=asyncio.run, args=(run_close_handler(),))
     close_thread.start()
 
     run_open_handler()
 
-    stop_flag = True  # Set stop_flag to True to stop the close_thread
+    sv.stop_flag = True  # Set stop_flag to True to stop the close_thread
     close_thread.join()
 
 

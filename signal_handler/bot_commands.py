@@ -1,5 +1,5 @@
 from telegram import Update, Bot
-import helpers.telegram as tel
+import helpers.telegr as tel
 from decouple import config
 from telegram.ext import ContextTypes
 import helpers.services as serv
@@ -7,13 +7,13 @@ import helpers.saldo as sal
 import helpers.visualizer as vis
 from models.settings import Settings
 from models.position import Position
-import main as m
+import shared_vars as sv
 
 telegram_bot_api_key = config('API_TOKEN_1')
 
 async def ping(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        coin = m.settings_gl.coin
-        exchange = m.settings_gl.exchange
+        coin = sv.settings_gl.coin
+        exchange = sv.settings_gl.exchange
         bot = Bot(token=telegram_bot_api_key)
         chat_id = update.message.chat_id
         await bot.send_message(chat_id=chat_id, text=f'{coin}-{exchange} - Alive!')

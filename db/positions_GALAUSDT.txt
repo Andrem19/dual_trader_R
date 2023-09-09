@@ -1,0 +1,1 @@
+{"time_open": "2023-09-09 21:40:28", "amount": 5, "signal": 1, "coin": "GALAUSDT", "duration": "0.0:2.0:36.86", "price_open": 0.01602, "time_close": "2023-09-09 21:43:05", "old_balance": 299.62948587, "new_balance": 299.6372, "profit": 0.0077}

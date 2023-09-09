@@ -6,6 +6,17 @@ import hmac
 import uuid
 import json
 
+round_coins = {
+    'ALGOUSDT': 4,
+    'DOTUSDT': 3,
+    'FILUSDT': 3,
+    'GALAUSDT': 5,
+    'XRPUSDT': 4,
+    'VETUSDT': 5,
+    'MATICUSDT': 4
+
+}
+
 class BybitAPI:
     @staticmethod
     def HTTP_Request(endPoint, method, payload, Info):
@@ -57,7 +68,7 @@ class BybitAPI:
             "positionIdx": 0,
             "orderType": "Limit",
             "qty": str(round(amount_coins, 3)),
-            "price": str(round(trig_price, 3)),
+            "price": str(round(trig_price, round_coins[symb])),
             "isLeverage": 5,
             "timeInForce": "GTC",
             "orderLinkId": orderLinkId

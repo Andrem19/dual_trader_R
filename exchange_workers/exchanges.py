@@ -1,7 +1,7 @@
 from models.settings import Settings
 from exchange_workers.bybit_http import BybitAPI
 from models.position import Position
-import helpers.telegram as tel
+import helpers.telegr as tel
 import datetime
 import asyncio
 import time
@@ -12,7 +12,7 @@ async def place_order(settings: Settings, buy_sell: int):
     order_id = ''
     
     if settings.exchange == 'BB':
-        response = BybitAPI.place_order(True, settings.coin, bs, settings.amount_coins, settings.order_in_perc, TP_perc=None, SL_perc=settings.super_close)
+        response = BybitAPI.place_order(False, settings.coin, bs, settings.amount_coins, settings.order_in_perc, TP_perc=None, SL_perc=settings.super_close)
         
         if 'retMsg' in response and response['retMsg'] == 'OK':
             order_id = response['result']['orderId']

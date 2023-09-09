@@ -1,0 +1,1 @@
+{"time_open": "2023-09-09 21:43:41", "amount": 5, "signal": 1, "coin": "ALGOUSDT", "duration": "0.0:1.0:55.56", "price_open": 0.0943, "time_close": "2023-09-09 21:45:37", "old_balance": 299.65044654, "new_balance": 299.6571, "profit": 0.0067}

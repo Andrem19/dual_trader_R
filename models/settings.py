@@ -1,9 +1,9 @@
 import json
 
 class Settings:
-    def __init__(self, tm):
+    def __init__(self, coin, tm):
         self.exchange: str = 'BB'
-        self.coin: str = None
+        self.coin: str = coin
         self.message_timer: int = 15
         self.t: int = tm
         self.target_len: int = 5
