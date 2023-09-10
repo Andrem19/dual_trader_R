@@ -28,7 +28,7 @@ async def open_position(settngs_gl: Settings, signal: int):
             await tel.send_inform_message(message, '', None)
             fb.write_data('status', 'entitys', settngs_gl.name, 1)
         while res:
-            time.sleep(5)
+            time.sleep(2)
             time_format = "%Y-%m-%d %H:%M:%S"
             time_obj = datetime.datetime.strptime(sv.current_position.time_open, time_format)
             duration = datetime.datetime.now() - time_obj

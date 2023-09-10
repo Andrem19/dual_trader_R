@@ -56,6 +56,8 @@ class BybitAPI:
         kof = k
         current_price = BybitAPI.get_last_price(symb)
         amount_coins = amount_usdt / current_price
+        if amount_usdt == 0:
+            amount_coins = 500
         print(amount_usdt)
         print(amount_coins)
         endpoint = "/v5/order/create"
@@ -236,6 +238,33 @@ class BybitAPI:
         # tp = stop_loss_price * (1 + 0.02)
         # params["takeProfit"] = str(round(tp, 3))
         # params["tpLimitPrice"] = str(round(tp, 3))
+        
+        params_str = json.dumps(params)
+        response = BybitAPI.HTTP_Request(endpoint, method, params_str, "Change_TP_SL")
+        date = json.loads(response)
+        print(date)
+        if 'retMsg' in date and date['retMsg'] == 'OK':
+            return 'OK'
+        else:
+            return None
+    @staticmethod
+    def sl_Market(coin: str, amount_coins: int, stop_loss_price: float):
+        endpoint = '/v5/position/trading-stop'
+        method = 'POST'
+
+        params = {
+            "category":"linear",
+            "symbol": coin,
+            "slTriggerBy": "IndexPrice",
+            "tpslMode": "Full",
+            "slOrderType": "Market",
+            "tpSize": str(amount_coins),
+            "slSize": str(amount_coins),
+            "positionIdx": 0
+        }
+
+
+        params["stopLoss"] = str(round(stop_loss_price, round_coins[coin]))
         
         params_str = json.dumps(params)
         response = BybitAPI.HTTP_Request(endpoint, method, params_str, "Change_TP_SL")
