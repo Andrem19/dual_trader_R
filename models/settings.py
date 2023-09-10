@@ -3,23 +3,21 @@ import json
 class Settings:
     def __init__(self, coin, tm):
         self.exchange: str = 'BB'
+        self.name: str = ''
         self.coin: str = coin
         self.message_timer: int = 15
         self.t: int = tm
-        self.target_len: int = 5
-        self.base_amount_coins: float = 5
-        self.amount_coins: float = 5
-        self.skip_min: int = 8
+        self.target_len: int = 2
+        self.base_amount_usdt: float = 20
+        self.amount_usdt: float = 20
+        self.skip_min: int = 4
         self.target_perc: float = 0.008
         self.trailing_stop: bool = True
         self.trailing_stop_triger: float = 0.003
         self.trailing_stop_dist: float = 0.0005
-        self.close_perc: float = 0.004
-        self.super_close: float = 0.006
+        self.close_perc: float = 0.003
+        self.super_close: float = 0.005
         self.order_in_perc: float = 0.0001
-        self.doubling: bool = False
-        self.doubling_counter: int = 3
-        self.doubling_rate: float = 1.5
         self.border_saldo: str = '03.09.23'
 
 

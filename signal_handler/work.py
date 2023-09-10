@@ -5,6 +5,7 @@ from exchange_workers.bybit_http import BybitAPI
 import helpers.telegr as tel
 import helpers.services as ser
 import helpers.saldo as sal
+import helpers.firebase as fb
 import datetime
 import shared_vars as sv
 import time
@@ -25,6 +26,7 @@ async def open_position(settngs_gl: Settings, signal: int):
             message = f'Position wasn\'t open'
             print(message)
             await tel.send_inform_message(message, '', None)
+            fb.write_data('status', 'entitys', settngs_gl.name, 1)
         while res:
             time.sleep(5)
             time_format = "%Y-%m-%d %H:%M:%S"
@@ -44,6 +46,7 @@ async def open_position(settngs_gl: Settings, signal: int):
                 res = False
                 await handle_positions(settngs_gl.coin)
                 sv.current_position.to_empty()
+                fb.write_data('status', 'entitys', settngs_gl.name, 1)
 
     except Exception as e:
         print(f'Error: {e}')

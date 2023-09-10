@@ -13,8 +13,12 @@ round_coins = {
     'GALAUSDT': 5,
     'XRPUSDT': 4,
     'VETUSDT': 5,
-    'MATICUSDT': 4
-
+    'MATICUSDT': 4,
+    'FTMUSDT': 4,
+    'KAVAUSDT': 4,
+    'MANAUSDT': 4,
+    'ATOMUSDT': 3,
+    'ADAUSDT': 4
 }
 
 class BybitAPI:
@@ -48,9 +52,12 @@ class BybitAPI:
         return signature
 
     @staticmethod
-    def place_order(pl_min: bool, symb: str, buy_sell: str, amount_coins: float, k: float = 0.0001, TP_perc = None, SL_perc = None):
+    def place_order(pl_min: bool, symb: str, buy_sell: str, amount_usdt: float, k: float = 0.0001, TP_perc = None, SL_perc = None):
         kof = k
         current_price = BybitAPI.get_last_price(symb)
+        amount_coins = amount_usdt / current_price
+        print(amount_usdt)
+        print(amount_coins)
         endpoint = "/v5/order/create"
         method = "POST"
         orderLinkId = uuid.uuid4().hex
@@ -67,7 +74,7 @@ class BybitAPI:
             "side": buy_sell,
             "positionIdx": 0,
             "orderType": "Limit",
-            "qty": str(round(amount_coins, 3)),
+            "qty": str(int(amount_coins)),
             "price": str(round(trig_price, round_coins[symb])),
             "isLeverage": 5,
             "timeInForce": "GTC",
@@ -76,14 +83,15 @@ class BybitAPI:
 
         if TP_perc is not None:
             tp = trig_price * (1 + TP_perc) if buy_sell == 'Buy' else trig_price * (1 - TP_perc)
-            params["takeProfit"] = str(round(tp, 3))
+            params["takeProfit"] = str(round(tp, round_coins[symb]))
         if SL_perc is not None:
             sl = trig_price * (1 - SL_perc) if buy_sell == 'Buy' else trig_price * (1 + SL_perc)
-            params["stopLoss"] = str(round(sl, 3))
+            params["stopLoss"] = str(round(sl, round_coins[symb]))
         params_str = json.dumps(params)
 
         result = BybitAPI.HTTP_Request(endpoint, method, params_str, "Create")
         data = json.loads(result)
+        print(data)
         return data
 
     @staticmethod
@@ -223,8 +231,8 @@ class BybitAPI:
         }
 
 
-        params["stopLoss"] = str(round(stop_loss_price, 3))
-        params["slLimitPrice"] = str(round(stopLoss_Limit, 3))
+        params["stopLoss"] = str(round(stop_loss_price, round_coins[coin]))
+        params["slLimitPrice"] = str(round(stopLoss_Limit, round_coins[coin]))
         # tp = stop_loss_price * (1 + 0.02)
         # params["takeProfit"] = str(round(tp, 3))
         # params["tpLimitPrice"] = str(round(tp, 3))

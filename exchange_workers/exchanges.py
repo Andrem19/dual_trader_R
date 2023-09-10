@@ -12,7 +12,7 @@ async def place_order(settings: Settings, buy_sell: int):
     order_id = ''
     
     if settings.exchange == 'BB':
-        response = BybitAPI.place_order(False, settings.coin, bs, settings.amount_coins, settings.order_in_perc, TP_perc=None, SL_perc=settings.super_close)
+        response = BybitAPI.place_order(False, settings.coin, bs, settings.amount_usdt, settings.order_in_perc, TP_perc=None, SL_perc=settings.super_close)
         
         if 'retMsg' in response and response['retMsg'] == 'OK':
             order_id = response['result']['orderId']
@@ -23,7 +23,7 @@ async def place_order(settings: Settings, buy_sell: int):
                 
                 if float(resp['size']) > 0:
                     old_balance = BybitAPI.get_balance('USDT')
-                    current_position = Position(settings.coin, open_time , float(resp['avgPrice']), old_balance, settings.amount_coins, buy_sell)
+                    current_position = Position(settings.coin, open_time , float(resp['avgPrice']), old_balance, float(resp['size']), buy_sell)
 
                     current_position.to_json()
                     await tel.send_inform_message(f'Position was taken successfully: {str(current_position)}', '', False)

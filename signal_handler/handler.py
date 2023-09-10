@@ -9,6 +9,7 @@ from telegram import Update, Bot
 import signal_handler.work as work
 import helpers.telegr as tel
 import shared_vars as m
+import helpers.firebase as fb
 import asyncio
 
 app = None
@@ -47,6 +48,7 @@ def open_worker():
                         resp = BybitAPI.get_position_info(settings.coin)
                         print(resp)
                         if float(resp['size']) == 0:
+                            fb.write_data('status', 'entitys', settings.name, 2)
                             await work.open_position(settings, signal)
                 else:
                     pass

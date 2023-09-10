@@ -7,6 +7,7 @@ import helpers.saldo as sal
 import helpers.visualizer as vis
 from models.settings import Settings
 from models.position import Position
+import helpers.firebase as fb
 import shared_vars as sv
 
 telegram_bot_api_key = config('API_TOKEN_2')
@@ -25,7 +26,17 @@ async def request(request: str, settings: Settings):
             await trend(commands[2], settings)
         if commands[1] == 'ph' or commands[1] == 'Ph':
             await pos_history(commands[2], settings)
-          
+        if commands[1] == 'st' or commands[1] == 'St':
+            await change_status(commands[2], settings)
+        if commands[1] == 'gs' or commands[1] == 'Gs':
+            await get_status(settings)
+
+
+async def get_status(date_str: str, settings: Settings):
+    res = fb.read_data('status', 'entitys')
+    tel.send_inform_message(f'status: {res[settings.name]}', '', False)
+async def change_status(date_str: str, settings: Settings):
+    fb.write_data('status', 'entitys', settings.name, int(date_str))
 
 async def trend(date_str: str, settings: Settings):
     saldos = sal.load_saldo()
